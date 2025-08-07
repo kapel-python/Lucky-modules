@@ -1,3 +1,5 @@
+# meta developer: @Lucky_modules
+
 from .. import loader, utils
 import random
 import aiohttp
