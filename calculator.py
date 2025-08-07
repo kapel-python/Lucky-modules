@@ -1,3 +1,4 @@
+# meta developer: @Lucky_modules
 import asyncio
 import math
 import re
