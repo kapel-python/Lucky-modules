@@ -1,5 +1,3 @@
-# meta developer: @Lucky_modules
-
 import asyncio
 import aiohttp
 from datetime import datetime
