@@ -1,3 +1,5 @@
+# meta developer: @Lucky_modules
+
 import aiohttp
 import datetime
 from urllib.parse import quote
