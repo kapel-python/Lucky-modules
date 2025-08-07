@@ -1,3 +1,5 @@
+# meta developer: @Lucky_modules
+
 import asyncio
 from .. import loader, utils
 from telethon.tl.types import Message
