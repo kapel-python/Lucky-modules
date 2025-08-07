@@ -4,7 +4,6 @@ import aiohttp
 import datetime
 from urllib.parse import quote
 from .. import loader, utils
-"""Модуль создан @Droplucky_project"""
 
 def weather_code_to_text(code):
     codes = {
