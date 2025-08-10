@@ -1,5 +1,5 @@
 # meta developer: @Lucky_modules
-# requires: pytz, deep_translator, geocoder
+# requires: pytz deep_translator geocoder
 
 import pytz
 from datetime import datetime
