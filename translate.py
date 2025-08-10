@@ -1,4 +1,5 @@
 # meta developer: @Lucky_modules
+# requires: deep_translator
 
 import asyncio
 from .. import loader, utils
