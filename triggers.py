@@ -1,3 +1,5 @@
+# meta developer: @Lucky_modules
+
 from .. import loader, utils
 import re
 import time
@@ -94,6 +96,22 @@ class TriggersMod(loader.Module):
             return user.first_name or "Пользователь"
         except:
             return "Пользователь"
+            
+    async def _resolve_user_id(self, message):
+        if message.is_reply:
+            reply_msg = await message.get_reply_message()
+            return reply_msg.sender_id
+        args = utils.get_args_raw(message)
+        if not args:
+            return None
+        if args.isdigit():
+            return int(args)
+        username = args.lstrip('@')
+        try:
+            entity = await self.client.get_entity(username)
+            return entity.id
+        except:
+            return None
 
     async def trigchatcmd(self, message):
         """Включить/выключить триггеры в текущем чате"""
@@ -550,43 +568,29 @@ class TriggersMod(loader.Module):
         await utils.answer(message, self.strings["trigger_list"].format(count, "\n".join(trigger_list)))
 
     async def trigbancmd(self, message):
-        """Заблокировать пользователя чтобы на него не работали триггеры"""
-        if message.is_reply:
-            reply_msg = await message.get_reply_message()
-            user_id = reply_msg.sender_id
-        else:
-            args = utils.get_args_raw(message)
-            if not args or not args.isdigit():
-                await utils.answer(message, "❌ Укажи ID пользователя или ответьте на сообщение")
-                return
-            user_id = int(args)
-        
+        """Заблокировать пользователя (ID / @username / реплай)"""
+        user_id = await self._resolve_user_id(message)
+        if not user_id:
+            await utils.answer(message, "❌ Укажи ID/юзернейм или ответь на сообщение")
+            return
         blacklist = self.db.get("Triggers", "blacklist", []) or []
         if user_id in blacklist:
             await utils.answer(message, self.strings["already_banned"])
             return
-        
         blacklist.append(user_id)
         self.db.set("Triggers", "blacklist", blacklist)
         await utils.answer(message, self.strings["banned"])
 
     async def trigunbancmd(self, message):
-        """Разблокировать пользователя"""
-        if message.is_reply:
-            reply_msg = await message.get_reply_message()
-            user_id = reply_msg.sender_id
-        else:
-            args = utils.get_args_raw(message)
-            if not args or not args.isdigit():
-                await utils.answer(message, "❌ Укажи ID пользователя или ответьте на сообщение")
-                return
-            user_id = int(args)
-        
+        """Разблокировать пользователя (ID / @username / реплай)"""
+        user_id = await self._resolve_user_id(message)
+        if not user_id:
+            await utils.answer(message, "❌ Укажи ID/юзернейм или ответь на сообщение")
+            return
         blacklist = self.db.get("Triggers", "blacklist", []) or []
         if user_id not in blacklist:
             await utils.answer(message, self.strings["not_banned"])
             return
-        
         blacklist.remove(user_id)
         self.db.set("Triggers", "blacklist", blacklist)
         await utils.answer(message, self.strings["unbanned"])
@@ -694,4 +698,4 @@ class TriggersMod(loader.Module):
                         message.chat_id,
                         error_info,
                         reply_to=message.id
-                    )
+            )
