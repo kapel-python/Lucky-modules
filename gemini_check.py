@@ -1,5 +1,7 @@
 # requires: google-generativeai
 # meta developer: @Lucky_modules
+# requires: google-genai google
+
 import base64
 import time
 from .. import loader, utils
