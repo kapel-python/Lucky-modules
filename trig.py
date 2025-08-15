@@ -219,8 +219,7 @@ class TriggersMod(loader.Module):
         start_time = time.time()
 
         try:
-            chat_id = call.message.chat_id if call.message else call.chat_id
-            messages = await self.client.get_messages(chat_id, limit=message_count)
+            messages = await self.client.get_messages(call.message.chat_id, limit=message_count)
             
             history_text = ""
             for msg in reversed(messages):
@@ -287,14 +286,12 @@ class TriggersMod(loader.Module):
         suggestion_text = ""
         buttons = []
         
-        chat_id = call.message.chat_id if call.message else call.chat_id
-        
         for i, (trigger, response) in enumerate(suggestions.items(), 1):
             suggestion_text += f"{i}. <code>{trigger}</code> → <code>{response}</code>\n"
             buttons.append([{
                 "text": f"➕ Добавить '{trigger}'",
                 "callback": self.add_suggested_trigger,
-                "args": (trigger, response, str(chat_id)),
+                "args": (trigger, response, str(call.message.chat_id)),
             }])
         
         await call.edit(
