@@ -141,10 +141,52 @@ class TriggersMod(loader.Module):
             await utils.answer(message, self.strings["ai_no_api_key"])
             return
 
-        await self.inline.form(
-            message=message,
-            text=self.strings["ai_select_count"],
-            reply_markup=[
+        # Проверяем количество сообщений в чате
+        try:
+            messages_25 = await self.client.get_messages(message.chat_id, limit=25)
+            messages_50 = await self.client.get_messages(message.chat_id, limit=50)
+            messages_100 = await self.client.get_messages(message.chat_id, limit=100)
+            
+            buttons = []
+            
+            # Добавляем кнопки в зависимости от количества сообщений
+            if len(messages_25) >= 25:
+                buttons.append([{
+                    "text": "25",
+                    "callback": self.analyze_messages,
+                    "args": (25,),
+                }])
+            else:
+                buttons.append([{
+                    "text": f"Все ({len(messages_25)})",
+                    "callback": self.analyze_messages,
+                    "args": (len(messages_25),),
+                }])
+                await self.inline.form(
+                    message=message,
+                    text=self.strings["ai_select_count"],
+                    reply_markup=buttons,
+                    silent=True
+                )
+                return
+                
+            if len(messages_50) >= 50:
+                buttons.append([{
+                    "text": "50",
+                    "callback": self.analyze_messages,
+                    "args": (50,),
+                }])
+                
+            if len(messages_100) >= 100:
+                buttons.append([{
+                    "text": "100",
+                    "callback": self.analyze_messages,
+                    "args": (100,),
+                }])
+
+        except Exception as e:
+            # Если не удалось проверить количество сообщений, показываем стандартные кнопки
+            buttons = [
                 [{
                     "text": "25",
                     "callback": self.analyze_messages,
@@ -160,7 +202,12 @@ class TriggersMod(loader.Module):
                     "callback": self.analyze_messages,
                     "args": (100,),
                 }]
-            ],
+            ]
+
+        await self.inline.form(
+            message=message,
+            text=self.strings["ai_select_count"],
+            reply_markup=buttons,
             silent=True
         )
 
@@ -172,7 +219,8 @@ class TriggersMod(loader.Module):
         start_time = time.time()
 
         try:
-            messages = await self.client.get_messages(call.message.chat_id, limit=message_count)
+            chat_id = call.message.chat_id if call.message else call.chat_id
+            messages = await self.client.get_messages(chat_id, limit=message_count)
             
             history_text = ""
             for msg in reversed(messages):
@@ -239,12 +287,14 @@ class TriggersMod(loader.Module):
         suggestion_text = ""
         buttons = []
         
+        chat_id = call.message.chat_id if call.message else call.chat_id
+        
         for i, (trigger, response) in enumerate(suggestions.items(), 1):
             suggestion_text += f"{i}. <code>{trigger}</code> → <code>{response}</code>\n"
             buttons.append([{
                 "text": f"➕ Добавить '{trigger}'",
                 "callback": self.add_suggested_trigger,
-                "args": (trigger, response, str(call.message.chat_id)),
+                "args": (trigger, response, str(chat_id)),
             }])
         
         await call.edit(
