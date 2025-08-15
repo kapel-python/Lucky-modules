@@ -219,6 +219,9 @@ class TriggersMod(loader.Module):
         start_time = time.time()
 
         try:
+            if not call.message:
+                await call.edit("❌ Ошибка: не удалось получить информацию о чате")
+                return
             messages = await self.client.get_messages(call.message.chat_id, limit=message_count)
             
             history_text = ""
@@ -285,6 +288,10 @@ class TriggersMod(loader.Module):
     async def show_ai_suggestions(self, call, suggestions):
         suggestion_text = ""
         buttons = []
+        
+        if not call.message:
+            await call.edit("❌ Ошибка: не удалось получить информацию о чате")
+            return
         
         for i, (trigger, response) in enumerate(suggestions.items(), 1):
             suggestion_text += f"{i}. <code>{trigger}</code> → <code>{response}</code>\n"
